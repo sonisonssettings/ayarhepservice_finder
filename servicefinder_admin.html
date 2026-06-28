@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AYARHEP Admin Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --blue:#1A5276;
+  --blue-light:#2E86C1;
+  --blue-pale:#D6EAF8;
+  --green:#1E8449;
+  --green-pale:#D5F5E3;
+  --red:#C0392B;
+  --red-pale:#FADBD8;
+  --orange:#CA6F1E;
+  --orange-pale:#FDEBD0;
+  --bg:#F4F6F9;
+  --surface:#FFFFFF;
+  --border:#E5E9F0;
+  --text:#1A1A2E;
+  --muted:#6B7A99;
+  --sidebar-w:220px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:var(--sidebar-w);flex-shrink:0;background:var(--blue);
+  display:flex;flex-direction:column;min-height:100vh;position:fixed;top:0;left:0;z-index:100
+}
+.sidebar-logo{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,0.1)}
+.sidebar-logo .name{font-size:18px;font-weight:700;color:#fff;letter-spacing:.5px}
+.sidebar-logo .sub{font-size:11px;color:rgba(255,255,255,0.55);margin-top:2px}
+.nav-section{padding:16px 0 4px 20px;font-size:10px;font-weight:600;color:rgba(255,255,255,0.4);letter-spacing:.08em;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;font-size:13px;color:rgba(255,255,255,0.7);cursor:pointer;transition:all .15s;border-left:3px solid transparent}
+.nav-item svg{width:16px;height:16px;flex-shrink:0}
+.nav-item:hover{background:rgba(255,255,255,0.08);color:#fff}
+.nav-item.active{background:rgba(255,255,255,0.12);color:#fff;border-left-color:#fff}
+.sidebar-footer{margin-top:auto;padding:16px 20px;border-top:1px solid rgba(255,255,255,0.1)}
+.sidebar-user{display:flex;align-items:center;gap:10px}
+.user-avatar{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#fff}
+.user-name{font-size:12px;color:#fff;font-weight:500}
+.user-role{font-size:10px;color:rgba(255,255,255,0.5)}
+
+/* ── MAIN ── */
+.main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.page-title{font-size:15px;font-weight:600;color:var(--text)}
+.page-date{font-size:12px;color:var(--muted)}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.icon-btn{width:36px;height:36px;border-radius:8px;border:1px solid var(--border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--muted);position:relative}
+.icon-btn:hover{background:var(--bg)}
+.notif-dot{position:absolute;top:6px;right:6px;width:6px;height:6px;border-radius:50%;background:var(--red)}
+.btn-primary{background:var(--blue);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background .15s}
+.btn-primary:hover{background:var(--blue-light)}
+
+/* ── CONTENT ── */
+.content{padding:28px;flex:1}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.section-title{font-size:13px;font-weight:600;color:var(--text)}
+
+/* ── STATS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.stat-card{background:var(--surface);border-radius:12px;padding:18px;border:1px solid var(--border)}
+.stat-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+.stat-icon svg{width:18px;height:18px}
+.stat-label{font-size:11px;color:var(--muted);font-weight:500;margin-bottom:4px}
+.stat-value{font-size:26px;font-weight:700;color:var(--text);line-height:1}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:6px;display:flex;align-items:center;gap:4px}
+.up{color:var(--green)} .dn{color:var(--red)}
+
+/* ── TWO COL ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.panel{background:var(--surface);border-radius:12px;border:1px solid var(--border);overflow:hidden}
+.panel-head{padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.panel-title{font-size:13px;font-weight:600}
+.panel-link{font-size:11px;color:var(--blue);cursor:pointer;font-weight:500}
+.panel-body{padding:16px 18px}
+
+/* BAR CHART */
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.bar-row:last-child{margin-bottom:0}
+.bar-label{font-size:12px;color:var(--muted);width:110px;flex-shrink:0}
+.bar-track{flex:1;height:7px;background:var(--bg);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;transition:width .4s ease}
+.bar-num{font-size:11px;color:var(--muted);width:24px;text-align:right}
+
+/* ACTIVITY */
+.activity-row{display:flex;gap:12px;margin-bottom:14px}
+.activity-row:last-child{margin-bottom:0}
+.act-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.act-text{font-size:12px;color:var(--text);line-height:1.5}
+.act-time{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* ── TABLE ── */
+.table-panel{background:var(--surface);border-radius:12px;border:1px solid var(--border);overflow:hidden}
+.table-toolbar{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px}
+.search-box{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:7px 12px;width:240px}
+.search-box input{background:transparent;border:none;outline:none;font-size:13px;color:var(--text);width:100%;font-family:'Inter',sans-serif}
+.search-box svg{width:14px;height:14px;color:var(--muted);flex-shrink:0}
+.filter-row{display:flex;gap:8px}
+.filter-btn{background:transparent;border:1px solid var(--border);border-radius:6px;padding:5px 12px;font-size:12px;color:var(--muted);cursor:pointer;font-family:'Inter',sans-serif}
+.filter-btn.active,.filter-btn:hover{background:var(--blue);color:#fff;border-color:var(--blue)}
+.btn-export{background:transparent;border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-size:12px;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:5px;font-family:'Inter',sans-serif}
+.btn-export:hover{background:var(--bg)}
+table{width:100%;border-collapse:collapse}
+th{font-size:11px;font-weight:600;color:var(--muted);padding:10px 18px;text-align:left;background:var(--bg);border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.04em}
+td{font-size:13px;color:var(--text);padding:13px 18px;border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#FAFBFD}
+.provider-cell{display:flex;align-items:center;gap:10px}
+.avatar{width:30px;height:30px;border-radius:50%;background:var(--blue-pale);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.provider-name{font-weight:500;font-size:13px}
+.provider-phone{font-size:11px;color:var(--muted)}
+.badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.b-active{background:var(--green-pale);color:var(--green)}
+.b-review{background:var(--orange-pale);color:var(--orange)}
+.b-inactive{background:var(--red-pale);color:var(--red)}
+.tbl-actions{display:flex;gap:4px}
+.tbl-btn{background:transparent;border:none;cursor:pointer;padding:5px;border-radius:6px;color:var(--muted);display:flex;align-items:center;justify-content:center}
+.tbl-btn:hover{background:var(--bg);color:var(--text)}
+.tbl-btn svg{width:15px;height:15px}
+.empty-state{padding:40px;text-align:center;color:var(--muted);font-size:13px}
+
+/* ── MODAL ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:200;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border-radius:16px;width:520px;max-height:90vh;overflow-y:auto;padding:28px}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.modal-title{font-size:16px;font-weight:700}
+.modal-close{background:transparent;border:none;cursor:pointer;color:var(--muted);font-size:20px;line-height:1}
+.form-group{margin-bottom:16px}
+.form-label{font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px;display:block}
+.form-input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'Inter',sans-serif;color:var(--text);outline:none;transition:border-color .15s}
+.form-input:focus{border-color:var(--blue)}
+.form-select{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:'Inter',sans-serif;color:var(--text);outline:none;background:var(--surface);cursor:pointer}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:24px;padding-top:20px;border-top:1px solid var(--border)}
+.btn-cancel{background:transparent;border:1px solid var(--border);border-radius:8px;padding:9px 18px;font-size:13px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif}
+.btn-save{background:var(--blue);color:#fff;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;right:24px;background:#1A1A2E;color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;font-weight:500;z-index:300;opacity:0;transform:translateY(8px);transition:all .25s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo" style="text-align:center">
+    <img src="data:image/png;base64,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" alt="AYARHEP logo" style="width:80px;height:auto;margin-bottom:8px;display:block;margin-left:auto;margin-right:auto"/><div class="name">AYARHEP</div>
+    <div class="sub">Admin Dashboard</div>
+  </div>
+
+  <div class="nav-section">Main</div>
+  <div class="nav-item active" onclick="setNav(this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    Dashboard
+  </div>
+  <div class="nav-item" onclick="setNav(this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    Providers
+  </div>
+  <div class="nav-item" onclick="setNav(this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+    Services
+  </div>
+  <div class="nav-item" onclick="setNav(this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+    Locations
+  </div>
+  <div class="nav-section">Users</div>
+  <div class="nav-item" onclick="setNav(this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    Users
+  </div>
+  <div class="nav-item" onclick="setNav(this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    Referrals
+  </div>
+  <div class="nav-section">System</div>
+  <div class="nav-item" onclick="setNav(this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    Reports
+  </div>
+  <div class="nav-item" onclick="setNav(this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93A10 10 0 0 0 4.93 19.07"/><path d="M4.93 4.93A10 10 0 0 1 19.07 19.07"/></svg>
+    Settings
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="user-avatar">AD</div>
+      <div>
+        <div class="user-name">Admin</div>
+        <div class="user-role">Super Admin</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="page-title">Dashboard</div>
+      <div class="page-date" id="today-date"></div>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="notif-dot"></span>
+      </button>
+      <button class="btn-primary" onclick="openModal()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Provider
+      </button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#D6EAF8">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#1A5276" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div class="stat-label">Total providers</div>
+        <div class="stat-value" id="s-providers">48</div>
+        <div class="stat-sub"><span class="up">↑ +3</span> this month</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#D5F5E3">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#1E8449" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <div class="stat-label">Active services</div>
+        <div class="stat-value">124</div>
+        <div class="stat-sub"><span class="up">↑ +11</span> this month</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#FDEBD0">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#CA6F1E" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div class="stat-label">Referrals (month)</div>
+        <div class="stat-value">312</div>
+        <div class="stat-sub"><span class="up">↑ 18%</span> vs last month</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon" style="background:#F9EBEA">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#C0392B" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <div class="stat-label">Counties covered</div>
+        <div class="stat-value">14</div>
+        <div class="stat-sub"><span class="up">+2</span> new regions</div>
+      </div>
+    </div>
+
+    <!-- TWO COL -->
+    <div class="two-col">
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Services by category</span>
+          <span class="panel-link">View all</span>
+        </div>
+        <div class="panel-body">
+          <div class="bar-row"><span class="bar-label">HIV Testing</span><div class="bar-track"><div class="bar-fill" style="width:80%;background:#2E86C1"></div></div><span class="bar-num">32</span></div>
+          <div class="bar-row"><span class="bar-label">Counselling</span><div class="bar-track"><div class="bar-fill" style="width:65%;background:#2E86C1"></div></div><span class="bar-num">26</span></div>
+          <div class="bar-row"><span class="bar-label">GBV Support</span><div class="bar-track"><div class="bar-fill" style="width:55%;background:#C0392B"></div></div><span class="bar-num">22</span></div>
+          <div class="bar-row"><span class="bar-label">Legal Aid</span><div class="bar-track"><div class="bar-fill" style="width:35%;background:#8E44AD"></div></div><span class="bar-num">14</span></div>
+          <div class="bar-row"><span class="bar-label">ART / Treatment</span><div class="bar-track"><div class="bar-fill" style="width:30%;background:#1E8449"></div></div><span class="bar-num">12</span></div>
+          <div class="bar-row"><span class="bar-label">Safe houses</span><div class="bar-track"><div class="bar-fill" style="width:20%;background:#CA6F1E"></div></div><span class="bar-num">8</span></div>
+          <div class="bar-row"><span class="bar-label">Other</span><div class="bar-track"><div class="bar-fill" style="width:25%;background:#7F8C8D"></div></div><span class="bar-num">10</span></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <span class="panel-title">Recent activity</span>
+          <span class="panel-link">See all</span>
+        </div>
+        <div class="panel-body">
+          <div class="activity-row"><div class="act-dot" style="background:#1E8449"></div><div><div class="act-text">Nairobi Women's Hospital added as new provider</div><div class="act-time">2 hours ago</div></div></div>
+          <div class="activity-row"><div class="act-dot" style="background:#2E86C1"></div><div><div class="act-text">GBV support listing updated — Mombasa</div><div class="act-time">5 hours ago</div></div></div>
+          <div class="activity-row"><div class="act-dot" style="background:#CA6F1E"></div><div><div class="act-text">3 service listings flagged for review</div><div class="act-time">Yesterday</div></div></div>
+          <div class="activity-row"><div class="act-dot" style="background:#1E8449"></div><div><div class="act-text">Kisumu Counselling Centre verified and approved</div><div class="act-time">Yesterday</div></div></div>
+          <div class="activity-row"><div class="act-dot" style="background:#2E86C1"></div><div><div class="act-text">47 referrals logged via service finder</div><div class="act-time">2 days ago</div></div></div>
+          <div class="activity-row"><div class="act-dot" style="background:#C0392B"></div><div><div class="act-text">Eldoret provider contact details outdated — action needed</div><div class="act-time">3 days ago</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-panel">
+      <div class="table-toolbar">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <span class="section-title">Service providers</span>
+          <div class="filter-row">
+            <button class="filter-btn active" onclick="filterStatus('all',this)">All</button>
+            <button class="filter-btn" onclick="filterStatus('active',this)">Active</button>
+            <button class="filter-btn" onclick="filterStatus('review',this)">Review</button>
+            <button class="filter-btn" onclick="filterStatus('inactive',this)">Inactive</button>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input id="search" type="text" placeholder="Search providers…" oninput="applyFilters()"/>
+          </div>
+          <button class="btn-export">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export CSV
+          </button>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Provider</th>
+            <th>Category</th>
+            <th>County</th>
+            <th>Status</th>
+            <th>Updated</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<!-- ADD PROVIDER MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Add new service provider</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Organisation name *</label>
+        <input class="form-input" id="f-name" type="text" placeholder="e.g. Nairobi Women's Hospital"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contact phone *</label>
+        <input class="form-input" id="f-phone" type="text" placeholder="e.g. 0700 000 000"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Service category *</label>
+        <select class="form-select" id="f-cat">
+          <option value="">Select category…</option>
+          <option>HIV Testing</option>
+          <option>Counselling</option>
+          <option>GBV Support</option>
+          <option>Legal Aid</option>
+          <option>ART / Treatment</option>
+          <option>Safe House</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">County *</label>
+        <select class="form-select" id="f-county">
+          <option value="">Select county…</option>
+          <option>Nairobi</option><option>Mombasa</option><option>Kisumu</option>
+          <option>Nakuru</option><option>Uasin Gishu</option><option>Kiambu</option>
+          <option>Machakos</option><option>Kilifi</option><option>Nyeri</option>
+          <option>Kakamega</option><option>Siaya</option><option>Bungoma</option>
+          <option>Trans Nzoia</option><option>Murang'a</option><option>Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Physical address</label>
+      <input class="form-input" id="f-address" type="text" placeholder="Street / area"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <input class="form-input" id="f-email" type="email" placeholder="contact@example.org"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Operating hours</label>
+      <input class="form-input" id="f-hours" type="text" placeholder="e.g. Mon–Fri 8am–5pm"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Description</label>
+      <textarea class="form-input" id="f-desc" rows="3" placeholder="Brief description of services offered…" style="resize:vertical"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" onclick="saveProvider()">Save provider</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── SUPABASE CONFIG ──
+const SUPABASE_URL = "https://mofxikrkzaxutnqsavtk.supabase.co";
+const SUPABASE_KEY = "sb_publishable_Z-HPkYvsBKAgW9I7-lIbng_ynwazbvs";
+
+async function sbFetch(path, options={}){
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    headers: {
+      "apikey": SUPABASE_KEY,
+      "Authorization": `Bearer ${SUPABASE_KEY}`,
+      "Content-Type": "application/json",
+      "Prefer": options.prefer || ""
+    },
+    ...options
+  });
+  if(!res.ok){ const e = await res.text(); throw new Error(e); }
+  return res.status === 204 ? null : res.json();
+}
+
+let providers = [];
+let statusFilter = "all";
+
+function initials(name){ return name.split(" ").slice(0,2).map(w=>w[0]).join("").toUpperCase() }
+
+function timeAgo(dateStr){
+  const diff = Date.now() - new Date(dateStr);
+  const mins = Math.floor(diff/60000);
+  if(mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins/60);
+  if(hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs/24);
+  if(days < 7) return `${days}d ago`;
+  return new Date(dateStr).toLocaleDateString("en-KE");
+}
+
+function renderTable(data){
+  const tbody = document.getElementById("table-body");
+  if(!data.length){
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state">No providers found. Click "Add Provider" to get started.</div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = data.map((p)=>`
+    <tr>
+      <td><div class="provider-cell"><div class="avatar">${initials(p.name)}</div><div><div class="provider-name">${p.name}</div><div class="provider-phone">${p.phone||''}</div></div></div></td>
+      <td>${p.category||''}</td>
+      <td>${p.county||''}</td>
+      <td><span class="badge ${p.status==='active'?'b-active':p.status==='review'?'b-review':'b-inactive'}">${p.status}</span></td>
+      <td>${p.created_at ? timeAgo(p.created_at) : '—'}</td>
+      <td><div class="tbl-actions">
+        <button class="tbl-btn" title="Edit" onclick="editProvider(${p.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+        <button class="tbl-btn" title="Toggle status" onclick="toggleStatus(${p.id},'${p.status}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></button>
+        <button class="tbl-btn" title="Delete" onclick="deleteProvider(${p.id},'${p.name}')" style="color:#C0392B"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
+      </div></td>
+    </tr>
+  `).join("");
+}
+
+function applyFilters(){
+  const q = document.getElementById("search").value.toLowerCase();
+  let data = providers;
+  if(statusFilter !== "all") data = data.filter(p=>p.status===statusFilter);
+  if(q) data = data.filter(p=>
+    (p.name||'').toLowerCase().includes(q)||
+    (p.category||'').toLowerCase().includes(q)||
+    (p.county||'').toLowerCase().includes(q)
+  );
+  renderTable(data);
+}
+
+function filterStatus(s, btn){
+  statusFilter = s;
+  document.querySelectorAll(".filter-btn").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+  applyFilters();
+}
+
+async function loadProviders(){
+  const tbody = document.getElementById("table-body");
+  tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state">Loading providers…</div></td></tr>`;
+  try {
+    providers = await sbFetch("providers?select=*&order=created_at.desc");
+    document.getElementById("s-providers").textContent = providers.length;
+    applyFilters();
+  } catch(e){
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state" style="color:#C0392B">Error loading data: ${e.message}</div></td></tr>`;
+  }
+}
+
+async function deleteProvider(id, name){
+  if(!confirm(`Remove "${name}"?`)) return;
+  try {
+    await sbFetch(`providers?id=eq.${id}`, { method:"DELETE", prefer:"return=minimal" });
+    showToast("Provider removed");
+    loadProviders();
+  } catch(e){ showToast("Error: " + e.message); }
+}
+
+async function toggleStatus(id, currentStatus){
+  const cycle = {active:"review", review:"inactive", inactive:"active"};
+  const newStatus = cycle[currentStatus];
+  try {
+    await sbFetch(`providers?id=eq.${id}`, {
+      method:"PATCH",
+      prefer:"return=minimal",
+      body: JSON.stringify({status: newStatus})
+    });
+    showToast(`Status changed to ${newStatus}`);
+    loadProviders();
+  } catch(e){ showToast("Error: " + e.message); }
+}
+
+async function editProvider(id){
+  const p = providers.find(x=>x.id===id);
+  if(!p) return;
+  document.getElementById("f-name").value = p.name||'';
+  document.getElementById("f-phone").value = p.phone||'';
+  document.getElementById("f-cat").value = p.category||'';
+  document.getElementById("f-county").value = p.county||'';
+  document.getElementById("f-address").value = p.address||'';
+  document.getElementById("f-email").value = p.email||'';
+  document.getElementById("f-hours").value = p.hours||'';
+  document.getElementById("f-desc").value = p.description||'';
+  document.getElementById("modal").dataset.editId = id;
+  document.querySelector(".modal-title").textContent = "Edit provider";
+  openModal();
+}
+
+// MODAL
+function openModal(){ document.getElementById("modal").classList.add("open") }
+function closeModal(){
+  document.getElementById("modal").classList.remove("open");
+  document.getElementById("modal").dataset.editId = "";
+  document.querySelector(".modal-title").textContent = "Add new service provider";
+  ["f-name","f-phone","f-address","f-email","f-hours","f-desc"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("f-cat").value="";
+  document.getElementById("f-county").value="";
+}
+
+async function saveProvider(){
+  const name = document.getElementById("f-name").value.trim();
+  const phone = document.getElementById("f-phone").value.trim();
+  const category = document.getElementById("f-cat").value;
+  const county = document.getElementById("f-county").value;
+  if(!name||!phone||!category||!county){ showToast("Please fill in all required fields"); return; }
+
+  const payload = {
+    name, phone, category, county,
+    address: document.getElementById("f-address").value.trim(),
+    email: document.getElementById("f-email").value.trim(),
+    hours: document.getElementById("f-hours").value.trim(),
+    description: document.getElementById("f-desc").value.trim(),
+    status: "active"
+  };
+
+  const editId = document.getElementById("modal").dataset.editId;
+  try {
+    if(editId){
+      await sbFetch(`providers?id=eq.${editId}`, { method:"PATCH", prefer:"return=minimal", body: JSON.stringify(payload) });
+      showToast(`✓ ${name} updated`);
+    } else {
+      await sbFetch("providers", { method:"POST", prefer:"return=minimal", body: JSON.stringify(payload) });
+      showToast(`✓ ${name} added successfully`);
+    }
+    closeModal();
+    loadProviders();
+  } catch(e){ showToast("Error saving: " + e.message); }
+}
+
+function showToast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"), 3000);
+}
+
+function setNav(el){ document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("active")); el.classList.add("active") }
+
+// DATE
+const d = new Date();
+document.getElementById("today-date").textContent = d.toLocaleDateString("en-KE",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+
+// LOAD ON START
+loadProviders();
+</script>
+</body>
+</html>
